@@ -12,7 +12,7 @@ namespace {
                                       "\n"
                                       "LDA #$FF\n"
                                       "LDX $12\n"
-                                      "LDY $1232\n"
+                                      "LDY $12325\n"
                                       "AND #$25, X\n"
                                       "\n"
                                       "macro MM\n"
@@ -24,7 +24,7 @@ namespace {
                                       "\n"
                                       "\n"
                                       "M\n"
-                                      "MM\n";
+                                      "MM";
 
 }
 
@@ -45,6 +45,27 @@ TEST_CASE("split_token_words() works")
 
 TEST_CASE("parse() works")
 {
-
+    auto const tokens = parse(example_source_1);
+    REQUIRE(tokens == std::vector<Token> {
+        Keyword::define, Name {"a"s}, HexLiteral {"32"}, Newline {},
+        Keyword::define, Name {"b"s}, HexLiteral {"42"}, Newline {},
+        Keyword::macro, Name {"m"s}, MacroStart {}, MacroEnd {}, Newline {},
+        Newline {},
+        Instruction::lda, ImmediateLiteralMarker {}, HexLiteral {"ff"s}, Newline {},
+        Instruction::ldx, HexLiteral {"12"s}, Newline {},
+        Instruction::ldy, HexLiteral {"12325"s}, Newline {},
+        Instruction::and_, ImmediateLiteralMarker {}, HexLiteral {"25"s}, Comma {}, Name {"x"s}, Newline {},
+        Newline {},
+        Keyword::macro, Name {"mm"s}, Newline {},
+        MacroStart {}, Newline {},
+        Instruction::clc, Newline {},
+        Instruction::sed, Newline {},
+        Instruction::bit, HexLiteral {"1233"s}, Comma {}, Name {"y"s}, Newline{},
+        MacroEnd {}, Newline {},
+        Newline {},
+        Newline {},
+        Name {"m"s}, Newline {},
+        Name {"mm"s}, Newline {},
+    });
 }
 

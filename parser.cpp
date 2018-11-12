@@ -175,7 +175,6 @@ namespace A65 {
     {
         std::vector<Token> tokens;
         parse_lines(source_code, tokens);
-        parse_words(source_code, tokens);
         return tokens;
     }
 
