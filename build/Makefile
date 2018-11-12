@@ -111,6 +111,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named a65
+
+# Build rule for target.
+a65: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 a65
+.PHONY : a65
+
+# fast build rule for target.
+a65/fast:
+	$(MAKE) -f CMakeFiles/a65.dir/build.make CMakeFiles/a65.dir/build
+.PHONY : a65/fast
+
+#=============================================================================
 # Target rules for targets named a65.bin
 
 # Build rule for target.
@@ -122,6 +135,19 @@ a65.bin: cmake_check_build_system
 a65.bin/fast:
 	$(MAKE) -f CMakeFiles/a65.bin.dir/build.make CMakeFiles/a65.bin.dir/build
 .PHONY : a65.bin/fast
+
+#=============================================================================
+# Target rules for targets named tests
+
+# Build rule for target.
+tests: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 tests
+.PHONY : tests
+
+# fast build rule for target.
+tests/fast:
+	$(MAKE) -f tests/CMakeFiles/tests.dir/build.make tests/CMakeFiles/tests.dir/build
+.PHONY : tests/fast
 
 main.o: main.cpp.o
 
@@ -150,6 +176,60 @@ main.cpp.s:
 	$(MAKE) -f CMakeFiles/a65.bin.dir/build.make CMakeFiles/a65.bin.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+parser.o: parser.cpp.o
+
+.PHONY : parser.o
+
+# target to build an object file
+parser.cpp.o:
+	$(MAKE) -f CMakeFiles/a65.dir/build.make CMakeFiles/a65.dir/parser.cpp.o
+.PHONY : parser.cpp.o
+
+parser.i: parser.cpp.i
+
+.PHONY : parser.i
+
+# target to preprocess a source file
+parser.cpp.i:
+	$(MAKE) -f CMakeFiles/a65.dir/build.make CMakeFiles/a65.dir/parser.cpp.i
+.PHONY : parser.cpp.i
+
+parser.s: parser.cpp.s
+
+.PHONY : parser.s
+
+# target to generate assembly for a file
+parser.cpp.s:
+	$(MAKE) -f CMakeFiles/a65.dir/build.make CMakeFiles/a65.dir/parser.cpp.s
+.PHONY : parser.cpp.s
+
+utils.o: utils.cpp.o
+
+.PHONY : utils.o
+
+# target to build an object file
+utils.cpp.o:
+	$(MAKE) -f CMakeFiles/a65.dir/build.make CMakeFiles/a65.dir/utils.cpp.o
+.PHONY : utils.cpp.o
+
+utils.i: utils.cpp.i
+
+.PHONY : utils.i
+
+# target to preprocess a source file
+utils.cpp.i:
+	$(MAKE) -f CMakeFiles/a65.dir/build.make CMakeFiles/a65.dir/utils.cpp.i
+.PHONY : utils.cpp.i
+
+utils.s: utils.cpp.s
+
+.PHONY : utils.s
+
+# target to generate assembly for a file
+utils.cpp.s:
+	$(MAKE) -f CMakeFiles/a65.dir/build.make CMakeFiles/a65.dir/utils.cpp.s
+.PHONY : utils.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -157,11 +237,19 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... a65.bin"
 	@echo "... edit_cache"
+	@echo "... a65"
+	@echo "... a65.bin"
+	@echo "... tests"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... parser.o"
+	@echo "... parser.i"
+	@echo "... parser.s"
+	@echo "... utils.o"
+	@echo "... utils.i"
+	@echo "... utils.s"
 .PHONY : help
 
 

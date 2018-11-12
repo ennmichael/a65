@@ -2,17 +2,22 @@
 #include <cctype>
 #include <cmath>
 
+using namespace std::string_literals;
+
 namespace A65 {
 
-	// Use regexes?
+
 	std::vector<std::string> split_lines(std::string const& text)
 	{
-
-	}
-
-	std::vector<std::string> split_words(std::string const& str)
-	{
-
+		std::vector<std::string> result {""s};
+		for (auto const c : text)
+		{
+			if (c == '\n')
+				result.push_back(""s);
+			else
+				result.back().push_back(c);
+		}
+		return result;
 	}
 
 	std::string lowercase(std::string const& str)
@@ -23,17 +28,12 @@ namespace A65 {
 		return copy;
 	}
 
-	bool starts_with(std::string const& str, std::string const& sample)
+	std::optional<int> parse_number(std::string const& str)
 	{
-		if (str.length() < sample.length())
-			return false;
-		auto min_length = std::min(str.length(), sample.length());
-		for (int i = 0; i < min_length; ++i)
-		{
-			if (str[i] != sample[i])
-				return false;
-		}
-		return true;
+		std::stringstream ss(str);
+		int result;
+		ss >> result;
+		return (ss.fail()) ? std::nullopt : std::optional(result);
 	}
 
 }

@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/tests.dir/tests.cpp.o CMakeFiles/tests.dir/test_parser.cpp.o  -o tests ../liba65.a 
