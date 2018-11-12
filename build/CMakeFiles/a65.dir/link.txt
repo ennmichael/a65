@@ -1,2 +1,0 @@
-/usr/bin/ar qc liba65.a  CMakeFiles/a65.dir/parser.cpp.o CMakeFiles/a65.dir/utils.cpp.o
-/usr/bin/ranlib liba65.a

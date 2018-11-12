@@ -1,6 +1,8 @@
 #include "parser.h"
 #include "utils.h"
+#include <cassert>
 #include <algorithm>
+#include <unordered_map>
 
 using namespace std::string_literals;
 
@@ -8,35 +10,39 @@ namespace A65 {
 
     namespace {
 
-        bool is_literal(std::string const& word)
-        {
-            return word.length() > 1 && word[0] == hex_literal_start;
-        }
-
         std::optional<Token> parse_punctuation(std::string const& word)
         {
-            if (word == std::string(1, comma))
-                return Comma {};
-            if (word == std::string(1, open_curly_bracket))
-                return OpenCurlyBracket {};
-            if (word == std::string(1, closed_curly_bracket))
-                return ClosedCurlyBracket {};
-            return std::nullopt;
+            if (word.length() != 1)
+                return std::nullopt;
+
+            static std::unordered_map<char, Token> lookup_table
+            {
+                {comma, Comma {}},
+                {macro_start, MacroStart {}},
+                {macro_end, MacroEnd {}},
+                {immediate_literal_marker, ImmediateLiteralMarker {}},
+            };
+
+            if (!lookup_table.count(word.front()))
+                return std::nullopt;
+            return lookup_table.at(word.front());
+        }
+
+        bool are_valid_hex_digits(std::string const& digits)
+        {
+            return std::all_of(digits.cbegin(), digits.cend(), isxdigit);
         }
 
         std::optional<Token> parse_literal(std::string const& word)
         {
-            if (!is_literal(word))
-                return std::nullopt;
-            auto literal_digits = word.substr(1);
-            std::optional<int> literal = parse_number(literal_digits);
-            if (literal == std::nullopt)
-                return InvalidToken {word, "Hex literal is not a number"s};
-            if (literal_digits.length() <= 2)
-                return OneByteLiteral {static_cast<char>(*literal)};
-            if (literal_digits.length() <= 4)
-                return TwoByteLiteral {}; // TODO
-            return InvalidToken {word, "Hex literal can't be more than two bytes in size"s};
+            if (word.length() > 1 && word.front() == hex_literal_marker)
+            {
+                auto digits = word.substr(1);
+                if (are_valid_hex_digits(digits))
+                    return HexLiteral {digits};
+                return InvalidToken {word, "Invalid hex literal"};
+            }
+            return std::nullopt;
         }
 
         std::optional<Token> parse_keyword(std::string const& word)
@@ -50,9 +56,41 @@ namespace A65 {
 
         std::optional<Token> parse_instruction(std::string const& word)
         {
-            if (word == "lda"s)
-                return Instruction::LDA;
-            return std::nullopt;
+            static std::unordered_map<std::string, Instruction> const lookup_table
+            {
+                {"adc"s, Instruction::adc}, {"and"s, Instruction::and_},
+                {"asl"s, Instruction::asl}, {"bcc"s, Instruction::bcc},
+                {"bcs"s, Instruction::bcs}, {"beq"s, Instruction::beq},
+                {"bit"s, Instruction::bit}, {"bmi"s, Instruction::bmi},
+                {"bne"s, Instruction::bne}, {"brk"s, Instruction::brk},
+                {"bvc"s, Instruction::bvc}, {"bvs"s, Instruction::bvs},
+                {"clc"s, Instruction::clc}, {"cld"s, Instruction::cld},
+                {"cli"s, Instruction::cli}, {"clv"s, Instruction::clv},
+                {"cmp"s, Instruction::cmp}, {"cpx"s, Instruction::cpx},
+                {"cpy"s, Instruction::cpy}, {"dec"s, Instruction::dec},
+                {"dex"s, Instruction::dex}, {"dey"s, Instruction::dey},
+                {"eor"s, Instruction::eor}, {"inc"s, Instruction::inc},
+                {"inx"s, Instruction::inx}, {"iny"s, Instruction::iny},
+                {"jmp"s, Instruction::jmp}, {"jsr"s, Instruction::jsr},
+                {"lda"s, Instruction::lda}, {"ldx"s, Instruction::ldx},
+                {"ldy"s, Instruction::ldy}, {"lsr"s, Instruction::lsr},
+                {"nop"s, Instruction::nop}, {"ora"s, Instruction::ora},
+                {"pha"s, Instruction::pha}, {"php"s, Instruction::php},
+                {"pla"s, Instruction::pla}, {"plp"s, Instruction::plp},
+                {"rol"s, Instruction::rol}, {"ror"s, Instruction::ror},
+                {"rti"s, Instruction::rti}, {"rts"s, Instruction::rts},
+                {"sbc"s, Instruction::sbc}, {"sec"s, Instruction::sec},
+                {"sed"s, Instruction::sed}, {"sei"s, Instruction::sei},
+                {"sta"s, Instruction::sta}, {"stx"s, Instruction::stx},
+                {"sty"s, Instruction::sty}, {"tax"s, Instruction::tax},
+                {"tay"s, Instruction::tay}, {"tsx"s, Instruction::tsx},
+                {"txa"s, Instruction::txa}, {"txs"s, Instruction::txs},
+                {"tya"s, Instruction::tya},
+            };
+
+            if (lookup_table.count(word) == 0)
+                return std::nullopt;
+            return lookup_table.at(word);
         }
 
         bool is_valid_name(std::string const& word)
@@ -74,7 +112,7 @@ namespace A65 {
                    parse_literal(lowercase_word).value_or(
                    parse_keyword(lowercase_word).value_or(
                    parse_instruction(lowercase_word).value_or(
-                   parse_name(lowercase_word).value_or(InvalidToken {})))));
+                   parse_name(lowercase_word).value_or(InvalidToken {word, "Invalid name"})))));
         }
 
         void parse_words(std::string const& line, std::vector<Token>& tokens)
@@ -99,16 +137,28 @@ namespace A65 {
 
     std::vector<std::string> split_token_words(std::string const& line)
     {
+        // line is not expected to end with '\n'
+
         std::vector<std::string> token_words {""};
         for (auto const c : line)
         {
-            if (isspace(c) && token_words.back() != "")
+            if (c == comment_start)
             {
-                token_words.push_back("");
+                // FIXME This is a bit of a hack
+                // Look for a nicer way to do this
+                break;
             }
-            else if (c == comma || c == open_curly_bracket || c == closed_curly_bracket)
+            else if (isspace(c))
             {
-                token_words.push_back(std::string(1, c));
+                if (token_words.back() != "")
+                    token_words.push_back("");
+            }
+            else if (c == comma || c == macro_start || c == macro_end || c == immediate_literal_marker)
+            {
+                if (token_words.back() == "")
+                    token_words.back() = std::string(1, c);
+                else
+                    token_words.push_back(std::string(1, c));
                 token_words.push_back("");
             }
             else
@@ -116,6 +166,8 @@ namespace A65 {
                 token_words.back().push_back(c);
             }
         }
+        if (token_words.back() == "")
+            token_words.pop_back();
         return token_words;
     }
 

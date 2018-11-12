@@ -1,7 +1,0 @@
-/home/johnc/projects/a65/build/CMakeFiles/rebuild_cache.dir
-/home/johnc/projects/a65/build/CMakeFiles/edit_cache.dir
-/home/johnc/projects/a65/build/CMakeFiles/a65.dir
-/home/johnc/projects/a65/build/CMakeFiles/a65.bin.dir
-/home/johnc/projects/a65/build/tests/CMakeFiles/rebuild_cache.dir
-/home/johnc/projects/a65/build/tests/CMakeFiles/tests.dir
-/home/johnc/projects/a65/build/tests/CMakeFiles/edit_cache.dir

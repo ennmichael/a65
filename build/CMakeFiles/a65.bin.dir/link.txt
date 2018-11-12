@@ -1,1 +1,0 @@
-/usr/bin/c++    -rdynamic CMakeFiles/a65.bin.dir/main.cpp.o  -o a65.bin liba65.a 
